@@ -24,16 +24,15 @@ class User(db.Model, UserMixin):
     
     #everytime we create a finData, add this finData ID to this relationship
     #this helps with keeping all the finData of a user together
-    FinData = db.relationship('FinData')
+    notes = db.relationship('Note')
 
 #defining a schema for financial data of the users
-class FinData(db.Model): ###### this should be for project purposes ######
+class Note(db.Model): ###### this should be for project purposes ######
     
     id = db.Column(db.Integer, primary_key=True)
-    data = db.Column(db.String(10000)) 
-    date = db.Column(db.DateTime(timezone=True), default=func.now())
-
     #all the finData should be associated to users, foreign key is needed
     #when creating a finData, we must pass a valid ID of an existing user (foreign key)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id')) #user.id goes to the user class, id column (primary key)
-    
+
+    data = db.Column(db.String(10000)) 
+    date = db.Column(db.DateTime(timezone=True), default=func.now())

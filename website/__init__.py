@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import path
+from flask_login import LoginManager
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
@@ -27,16 +28,21 @@ def create_app():
     app.register_blueprint(auth, url_prefix='/')
     
     #importing the classes so that flask know that they're there
-    from .models import User, FinData
+    from .models import User, Note
     
-    create_database(app)
+    #if the database doesn't exist in the directory
+    #specifying the app that the db is associated with
+    with app.app_context():
+        db.create_all()
+        
+    #tells flask how we actually login a user
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.login' #where does flask takes us if we're not logged in
+    login_manager.init_app(app) #telling login manager which app we're using
+    
+    #telling flask how to we load a user (referencing them by ID)
+    @login_manager.user_loader
+    def load_user(id):
+        return User.query.get(int(id))
     
     return app
-
-def create_database(app):
-    #if the database doesn't exist in the directory
-    if not path.exists('website/' + DB_NAME):
-        
-        #specifying the app that the db is associated with
-        db.create_all(app=app)
-        print('Created Database')
